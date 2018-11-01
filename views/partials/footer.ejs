@@ -1,0 +1,32 @@
+        </div>
+        <script type ="text/javascript">
+            $(document).ready(function (){
+                var user;
+                var socket = io.connect();
+                $('#button').click(function (){
+                    let messages;
+                    var data = $("#body").find('input[name="name"]').val();
+                    $("#body").html(`<input type='text' name='message' id='field'><button class='btn btn-primary' id="send">Send</button><% if (messages){ %><% for (var message in messages){ %><h2><%= messages[message] %></h2><% } %><% } %><div id='text'></div>`);
+                    user = data
+                    socket.emit("got_a_new_user", data);
+                });
+                socket.on('new_user', function (data){
+                    $('#text').append(`<h2>${data.user}, a new user joined!</h2>`);
+                });
+                $('body').on('click', '#send', function() {
+                    var data = $('#body').find('input[name="message"]').val()
+                    data = user + ": " + data
+                    socket.emit('new_message', data);
+                    $('#field').val('');
+                });
+                socket.on('update_message', function (data){
+                    $('#text').append(`<h2>${data}</h2>`);
+                });
+                socket.on('disconnect_user', function (data){
+                    $('#text').append(`<h2>${data} has left the chat!</h2>`);
+                    socket.emit('user_left', data);
+                });
+            });
+        </script>
+    </body>
+</html>
